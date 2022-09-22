@@ -36,11 +36,8 @@ public class UserStorage implements ProjectRepository<UserDto> {
 
     @Override
     public UserDto find(long id) {
-        UserDto user = users.get(id);
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("Can't find element by this id");
-        }
-        return user;
+        UserDto userDto = users.get(id);
+        return userDto;
     }
 
     @Override
@@ -54,9 +51,6 @@ public class UserStorage implements ProjectRepository<UserDto> {
 
     @Override
     public UserDto update(UserDto item, long id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("Can't find element by this id");
-        }
         return users.put(id, item);
     }
 
@@ -77,5 +71,9 @@ public class UserStorage implements ProjectRepository<UserDto> {
             throw new NotFoundException("Can't find element by this id");
         }
         return userBooks.get(userId);
+    }
+
+    public Map<Long, UserDto> getUsers() {
+        return users;
     }
 }

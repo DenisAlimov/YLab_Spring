@@ -1,5 +1,6 @@
 package com.edu.ulab.app.web;
 
+import com.edu.ulab.app.exception.ValidationException;
 import com.edu.ulab.app.facade.UserDataFacade;
 import com.edu.ulab.app.web.constant.WebConstant;
 import com.edu.ulab.app.web.request.UserBookRequest;
@@ -31,7 +32,7 @@ public class UserController {
     @PostMapping(value = "/create")
     @Operation(summary = "Create user book row.",
             responses = {
-                    @ApiResponse(description = "User book",
+                    @ApiResponse(description = "User id and list of books ids",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = UserBookResponse.class)))})
     public UserBookResponse createUserWithBooks(@RequestBody UserBookRequest request,
@@ -42,6 +43,11 @@ public class UserController {
     }
 
     @PutMapping(value = "/update/{userId}")
+    @Operation(summary = "Update user book row.",
+            responses = {
+                    @ApiResponse(description = "User id and list of books ids",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserBookResponse.class)))})
     public UserBookResponse updateUserWithBooks(@RequestBody UserBookRequest request, @PathVariable Long userId) {
         UserBookResponse response = userDataFacade.updateUserWithBooks(request, userId);
         log.info("Response with updated user and his books: {}", response);
@@ -49,13 +55,23 @@ public class UserController {
     }
 
     @GetMapping(value = "/get/{userId}")
+    @Operation(summary = "Get user book row.",
+            responses = {
+                    @ApiResponse(description = "User id and list of books ids",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserBookResponse.class)))})
     public UserBookResponse updateUserWithBooks(@PathVariable Long userId) {
-        UserBookResponse response = userDataFacade.getUserWithBooks(userId);
+            UserBookResponse response = userDataFacade.getUserWithBooks(userId);
         log.info("Response with user and his books: {}", response);
         return response;
     }
 
     @DeleteMapping(value = "/delete/{userId}")
+    @Operation(summary = "Delete user and all his books from storage",
+            responses = {
+                    @ApiResponse(description = "User id",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserBookResponse.class)))})
     public void deleteUserWithBooks(@PathVariable Long userId) {
         log.info("Delete user and his books:  userId {}", userId);
         userDataFacade.deleteUserWithBooks(userId);

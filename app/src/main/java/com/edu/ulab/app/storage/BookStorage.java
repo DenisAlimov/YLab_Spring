@@ -1,7 +1,6 @@
 package com.edu.ulab.app.storage;
 
 import com.edu.ulab.app.dto.BookDto;
-import com.edu.ulab.app.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -27,11 +26,8 @@ public class BookStorage implements ProjectRepository<BookDto> {
 
     @Override
     public BookDto find(long id) {
-        BookDto book = books.get(id);
-        if (book == null) {
-            throw new NotFoundException("Can't find element by this id");
-        }
-        return book;
+        BookDto bookDto = books.get(id);
+        return bookDto;
     }
 
     @Override
@@ -43,4 +39,9 @@ public class BookStorage implements ProjectRepository<BookDto> {
     public BookDto update(BookDto item, long id) {
         return books.put(id, item);
     }
+
+    public Map<Long, BookDto> getBooks() {
+        return books;
+    }
 }
+

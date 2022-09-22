@@ -2,6 +2,8 @@ package com.edu.ulab.app.facade;
 
 import com.edu.ulab.app.dto.BookDto;
 import com.edu.ulab.app.dto.UserDto;
+import com.edu.ulab.app.exception.NotFoundException;
+import com.edu.ulab.app.exception.ValidationException;
 import com.edu.ulab.app.mapper.BookMapper;
 import com.edu.ulab.app.mapper.UserMapper;
 import com.edu.ulab.app.service.BookService;
@@ -36,18 +38,21 @@ public class UserDataFacade {
     }
 
     public UserBookResponse createUserWithBooks(UserBookRequest userBookRequest) {
+        if (userBookRequest.getUserRequest().getFullName() == null) {
+            throw new ValidationException("User name shouldn't be empty");
+        }
         log.info("Got user book create request: {}", userBookRequest);
         UserDto userDto = userMapper.userRequestToUserDto(userBookRequest.getUserRequest());
         log.info("Mapped user request: {}", userDto);
 
-        UserDto createdUser = userService.createUser(userDto);
-        log.info("Created user: {}", createdUser);
+        UserDto createdUserDto = userService.createUser(userDto);
+        log.info("Created user: {}", createdUserDto);
 
         List<Long> bookIdList = userBookRequest.getBookRequests()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(bookMapper::bookRequestToBookDto)
-                .peek(bookDto -> bookDto.setUserId(createdUser.getId()))
+                .peek(bookDto -> bookDto.setUserId(createdUserDto.getId()))
                 .peek(mappedBookDto -> log.info("mapped book: {}", mappedBookDto))
                 .map(bookService::createBook)
                 .peek(createdBook -> log.info("Created book: {}", createdBook))
@@ -55,10 +60,10 @@ public class UserDataFacade {
                 .toList();
         log.info("Collected book ids: {}", bookIdList);
 
-        userStorage.addBooks(createdUser.getId(), bookIdList);
+        userStorage.addBooks(createdUserDto.getId(), bookIdList);
 
         return UserBookResponse.builder()
-                .userId(createdUser.getId())
+                .userId(createdUserDto.getId())
                 .booksIdList(bookIdList)
                 .build();
     }
@@ -68,8 +73,8 @@ public class UserDataFacade {
         UserDto userDto = userMapper.userRequestToUserDto(userBookRequest.getUserRequest());
         log.info("Mapped user request: {}", userDto);
 
-        UserDto updatedUser = userService.updateUser(userDto, userId);
-        log.info("Updated user: {}", updatedUser);
+        UserDto updatedUserDto = userService.updateUser(userDto, userId);
+        log.info("Updated user: {}", updatedUserDto);
 
         List<Long> bookIdList = userBookRequest.getBookRequests()//DRY страдает, вынести лучше в метод?
                 .stream()
@@ -83,10 +88,14 @@ public class UserDataFacade {
                 .toList();
         log.info("Collected book ids: {}", bookIdList);
 
+        if (!userStorage.getUsers().containsKey(updatedUserDto.getId())) {
+            throw new NotFoundException("Can't find user by this id");
+        }
+
         userStorage.updateUserBooks(bookIdList, userId);
 
         return UserBookResponse.builder()
-                .userId(updatedUser.getId())
+                .userId(updatedUserDto.getId())
                 .booksIdList(bookIdList)
                 .build();
     }
