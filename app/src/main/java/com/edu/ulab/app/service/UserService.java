@@ -5,9 +5,9 @@ import com.edu.ulab.app.dto.UserDto;
 public interface UserService {
     UserDto createUser(UserDto userDto);
 
-    UserDto updateUser(UserDto userDto);
+    UserDto updateUser(UserDto userDto, long id);
 
-    UserDto getUserById(Long id);
+    UserDto getUserById(long id);
 
-    void deleteUserById(Long id);
+    void deleteUserById(long id);
 }
